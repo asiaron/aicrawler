@@ -7,8 +7,6 @@ created by pavel in pavel as 5/26/20
 Проект aicrawler
 """
 
-import datetime
-
 __author__ = 'pavelmstu'
 __maintainer__ = 'pavelmstu'
 __credits__ = ['pavelmstu', ]
@@ -17,10 +15,9 @@ __status__ = 'Development'
 __version__ = '20200526'
 
 from typing import List, Tuple, Dict, Optional, Callable, Union
-
-from collections import namedtuple
-
-from dataclasses import dataclass
+from collections import namedtuple, UserDict
+from dataclasses import dataclass, field
+from datetime import datetime
 
 Preview = namedtuple("header", 'text')
 
@@ -31,44 +28,39 @@ class Attachment(object):
     """
 
 
+@dataclass
 class Page(object):
     """
     Страница.
     """
-
-    def __init__(self, url):
-        self._url = url
-
-        self._html = None
-
-
-    @property
-    def url(self):
-        return self._url
+    url: str
+    _html: str = field(init=False, default=None)
 
     @property
     def html(self):
-        if self._html:
-            return self._html
-        raise NotImplementedError("!")
+        if not self._html:
+            self._html = self._collect_html()
+        return self._html
 
-
-class NewsPage(Page):
-
-    def __init__(self, url, preview: Preview, time: datetime.datetime, subjects: List[str]):
-        super().__init__(url)
-        self._time = time
-        self._preview = preview
-        self._subjects = subjects
-
-    @property
-    def preview(self):
-        return self._preview
+    def _collect_html(self) -> str:
+        return ""
 
 
 @dataclass
-class Info():
+class NewsPage(Page):
+    title: str
+    time: datetime = None
+    preview: Preview = None
+    subjects: List[str] = None
 
+
+class PageBuilder(UserDict):
+    def build_as(self, cls):
+        return cls(**self.data)
+
+
+@dataclass
+class Info:
     # Заголовок новости
     header: str
 
@@ -82,7 +74,7 @@ class Info():
     text: str
 
     # Время самой новости. Если извлечено из нескольких -- наименьшее
-    time: datetime.datetime  # or Null
+    time: Union[datetime, None]
 
     attachments: List[Attachment]
 

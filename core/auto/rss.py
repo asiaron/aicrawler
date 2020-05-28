@@ -18,43 +18,58 @@ __status__ = 'Development'
 __version__ = '20200526'
 
 import requests
+# noinspection PyUnresolvedReferences
 from xml.dom.minidom import parseString
+from core.auto import BaseAuto
+from core import Page, NewsPage
+from typing import List
+from feedparser import FeedParserDict
+import feedparser
 
-from core.auto import BaseAuto, Page
+from time import struct_time, mktime
+from datetime import datetime
+from urllib.parse import urlparse
 
 
-class RssAuto(BaseAuto):
-    """
-    Просто GET и POST запросы
-    """
-    @property
-    def xml(self):
-        if not self._xml:
-            self._xml = requests.get(self._url).text
-        return self._xml
-
-    @property
-    def dom(self):
-        if not self._dom:
-            self._dom = parseString(self.xml)
-        return self._dom
-
-    @classmethod
-    def parse_item(cls, item) -> Page:
-        title = item.getElementsByTagName("title")[0].firstChild.data
-        link = item.getElementsByTagName("link")[0].firstChild.data
-        # preview = item.getElementsByTagName("description")[0].firstChild.data
-        # subjects = [c.firstChild.data for c in item.getElementsByTagName("category")]
-        time = item.getElementsByTagName("pubDate")[0].firstChild.data
-        return Page(link)
-
-    def get_pages(self):# -> List[Page]:
-        items = self.dom.getElementsByTagName("item")
-        pages = [self.parse_item(item) for item in items]
-
-        return pages
-
+class RssParser:
     def __init__(self, url):
         self._url = url
-        self._xml = None
-        self._dom = None
+        self._netloc = None
+        self._pages = None
+        self._feed = feedparser.parse(url)
+
+    @property
+    def pages(self):
+        if not self._pages:
+            self._pages = [self.entry_to_page(entry) for entry in self._feed.entries]
+        return self._pages
+
+    @property
+    def netloc(self):
+        if not self._netloc:
+            self._netloc = urlparse(self._feed.link).netloc
+            if not self._netloc:  # link is invalid
+                raise ValueError('link of rss feed is invalid')
+        return self._netloc
+
+    def guid_to_page_id(self, guid: str) -> str:
+        parsed = urlparse(guid)
+        if not parsed.scheme or not parsed.netloc:
+            return f'{self.netloc}::{guid}'
+        else:
+            return f'{parsed.netloc}::{parsed.path[1:]}'  # without leading /, example: '/moskva/1' -> 'moskva/1'
+
+    @staticmethod
+    def struct_time_to_datetime(struct: struct_time) -> datetime:
+        return datetime.fromtimestamp(mktime(struct))
+
+    def entry_to_page(self, entry: FeedParserDict) -> NewsPage:
+        return NewsPage(
+            url=entry.link,
+            title=entry.title,
+            time=self.struct_time_to_datetime(entry.published_parsed),
+            # guid=self.guid_to_page_id(entry.guid),
+            # timezone=
+            preview=entry.get('summary', None),
+            subjects=[tag.term for tag in entry.get('tags')]
+        )

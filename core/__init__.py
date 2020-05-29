@@ -34,7 +34,7 @@ class Page(object):
     Страница.
     """
     url: str
-    _html: str = field(init=False, default=None)
+    _html: str = field(init=False, default=None, repr=False)
 
     @property
     def html(self):

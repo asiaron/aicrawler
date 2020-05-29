@@ -11,6 +11,7 @@ def webdriver():
     wd.close()
 
 
+@pytest.mark.skip('skip')
 def test_getting_urls_from_rbc_crawler(webdriver):
     # webdriver = Chrome()
     crawler = RbcCrawler(webdriver)

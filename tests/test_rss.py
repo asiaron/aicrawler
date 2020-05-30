@@ -5,7 +5,7 @@ import json
 import pytest
 
 from core.auto.rss import RssParser
-from core import NewsPage
+from core import Info
 
 
 @pytest.fixture('session')
@@ -26,13 +26,13 @@ def example_page_json():
 
 @pytest.fixture('session')
 def ideal_tass_third_page():
-    return NewsPage(url='https://tass.ru/moskovskaya-oblast/8573937',
-                    title='Передвижные пункты вакцинации животных против бешенства заработали в Подмосковье',
-                    # guid='tass.ru::moskva/8591843',
-                    time=datetime(2020, 5, 27, 8, 00, 45, 0),  # , timezone(timedelta(hours=3))),
-                    preview='В регионе работает 55 выездных бригад ветеринарных специалистов',
-                    subjects=['Московская область']
-                    )
+    return Info(url='https://tass.ru/moskovskaya-oblast/8573937',
+                title='Передвижные пункты вакцинации животных против бешенства заработали в Подмосковье',
+                # guid='tass.ru::moskva/8591843',
+                time=datetime(2020, 5, 27, 8, 00, 45, 0),  # , timezone(timedelta(hours=3))),
+                preview='В регионе работает 55 выездных бригад ветеринарных специалистов',
+                subjects=['Московская область']
+                )
 
 
 def test_parsed_page_format(tass_pages, ideal_tass_third_page):

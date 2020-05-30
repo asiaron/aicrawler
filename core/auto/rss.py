@@ -21,7 +21,7 @@ import requests
 # noinspection PyUnresolvedReferences
 from xml.dom.minidom import parseString
 from core.auto import BaseAuto
-from core import Page, NewsPage
+from core import Page, Info
 from typing import List
 from feedparser import FeedParserDict
 import feedparser
@@ -63,8 +63,8 @@ class RssParser:
     def struct_time_to_datetime(struct: struct_time) -> datetime:
         return datetime.fromtimestamp(mktime(struct))
 
-    def entry_to_page(self, entry: FeedParserDict) -> NewsPage:
-        return NewsPage(
+    def entry_to_page(self, entry: FeedParserDict) -> Info:
+        return Info(
             url=entry.link,
             title=entry.title,
             time=self.struct_time_to_datetime(entry.published_parsed),

@@ -48,7 +48,7 @@ class RbcCrawler(BaseCrawler):
 
     def do_query(self, query: str) -> None:
         url = self.QUERY_TEMPLATE.format(query=query)
-        # print(self._webdriver, url)
+        # print(self._webdriver, link)
         self._webdriver.get(url)
 
     def form_datetime(date: str, time: str) -> datetime:
@@ -60,7 +60,7 @@ class RbcCrawler(BaseCrawler):
     @classmethod
     def get_data_from_element(cls, element: WebElement) -> Dict[str, Any]:
         data = {}
-        data["url"] = element.find_element_by_class_name("search-item__link").get_attribute("href")
+        data["link"] = element.find_element_by_class_name("search-item__link").get_attribute("href")
         data["title"] = element.find_element_by_class_name("search-item__title").text
         data["preview"] = element.find_element_by_class_name("search-item__text").text
 
@@ -81,7 +81,7 @@ class RbcCrawler(BaseCrawler):
 
     @staticmethod
     def form_page(data: Dict[str, Any]) -> Page:
-        return Page(data["url"])
+        return Page(data["link"])
         
     def collect_elements(self, limit: int) -> List[WebElement]:
         return self._webdriver.find_elements_by_class_name("search-item")[:limit]

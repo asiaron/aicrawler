@@ -16,8 +16,9 @@ __version__ = '20200526'
 
 from typing import List, Tuple, Dict, Optional, Callable, Union
 from collections import namedtuple, UserDict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
+from json import dumps, loads
 
 Preview = namedtuple("header", 'text')
 
@@ -45,13 +46,61 @@ class Page(object):
     def _collect_html(self) -> str:
         return ""
 
+@dataclass
+class TimeZone:
+    offset: int
+    name: str
 
 @dataclass
-class NewsPage(Page):
+class Info:
+    """
+    description of the docs/json.md
+    """
+    action: int
+    type: str
+    source: str
+    source_url: str
     title: str
-    time: datetime = None
-    preview: Preview = None
-    subjects: List[str] = None
+    guid: str
+    link: str
+    description: str
+    preview: str
+    subjects: List[str]
+    time: datetime
+    zone: TimeZone
+
+    def to_json(self) -> str:
+        dict_ = asdict(self)
+        time: datetime = dict_['datetime']
+        dict_['datetime'] = time.isoformat()
+        return dumps(dict_)
+
+    @classmethod
+    def from_json(cls, json: str):
+        dict_ = loads(json)
+        iso_time: str = dict_['datetime']
+        dict_['datetime'] = datetime.fromisoformat(iso_time)
+        zone: Dict = dict_['zone']
+        dict_['zone'] = TimeZone(zone)
+        return cls(dict_)
+    #
+    # "action": 1,
+    # "type": "rss",
+    # "source": "tass",
+    # "source_url": "tass.ru",
+    # "title": "Комитет Думы поддержал законопроект о праве сотрудников ФСИН объявлять предостережение",
+    # "guid": "tass::8574085",
+    # "link": "https://tass.ru/obschestvo/8574085",
+    # "description": "Инициатива призвана устранить правовую коллизию, когда органы уголовно-исполнительной системы являются субъектами профилактики правонарушений, но необходимых полномочий не имеют",
+    # "preview": "Инициатива призвана устранить правовую коллизию, когда органы уголовно-исполнительной системы являются субъектами профилактики правонарушений, но необходимых полномочий не имеют",
+    # "subjects": [
+    #     "общество"
+    # ],
+    # "time": "2020.05.27 08:01",
+    # "zone": {
+    #     "offset": 3,
+    #     "name": "MSK"
+    # }
 
 
 class PageBuilder(UserDict):
@@ -60,14 +109,14 @@ class PageBuilder(UserDict):
 
 
 @dataclass
-class Info:
+class Info_:
     # Заголовок новости
     header: str
 
     # Превью новости
     preview: str  # or Null
 
-    # Список url из которых была получена данная новость
+    # Список link из которых была получена данная новость
     # urls: List[str]
 
     # основной текст новости

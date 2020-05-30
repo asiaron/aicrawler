@@ -71,18 +71,18 @@ class Info:
 
     def to_json(self) -> str:
         dict_ = asdict(self)
-        time: datetime = dict_['datetime']
-        dict_['datetime'] = time.isoformat()
+        time: datetime = dict_['time']
+        dict_['time'] = time.isoformat()
         return dumps(dict_)
 
     @classmethod
     def from_json(cls, json: str):
         dict_ = loads(json)
-        iso_time: str = dict_['datetime']
-        dict_['datetime'] = datetime.fromisoformat(iso_time)
+        iso_time: str = dict_['time']
+        dict_['time'] = datetime.fromisoformat(iso_time)
         zone: Dict = dict_['zone']
-        dict_['zone'] = TimeZone(zone)
-        return cls(dict_)
+        dict_['zone'] = TimeZone(**zone)
+        return cls(**dict_)
     #
     # "action": 1,
     # "type": "rss",

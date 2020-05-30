@@ -33,7 +33,7 @@ def ideal_tass_third_info():
         preview='В регионе работает 55 выездных бригад ветеринарных специалистов',
         time=datetime(2020, 5, 27, 8, 0, 45, 0),  # '2020-05-27T08:00:45',
         subjects=[
-            'Московская область'
+            'московская область'
         ],
         zone=TimeZone(
             offset=3,
@@ -50,12 +50,12 @@ def test_number_of_parsed_pages(tass_info):
     assert len(tass_info) == 99
 
 
-@pytest.mark.skip('to_json yet is not implemented')
+# @pytest.mark.skip('to_json yet is not implemented')
 def test_json_representation_of_info(ideal_tass_third_info, example_info_json):
     assert ideal_tass_third_info.to_json() == example_info_json
 
 
-@pytest.mark.skip('from_json yet is not implemented')
+# @pytest.mark.skip('from_json yet is not implemented')
 def test_restoration_info_from_json(ideal_tass_third_info, example_info_json):
     assert ideal_tass_third_info == Info.from_json(example_info_json)
 

@@ -83,7 +83,7 @@ class RssParser:
             link=entry.link,
             description=entry.get('summary', ''),
             preview=entry.get('summary', ''),
-            subjects=[tag.term for tag in entry.get('tags')],
+            subjects=[tag.term.lower() for tag in entry.get('tags')],
             time=self.struct_time_to_datetime(time),
             zone=TimeZone(
                 offset=3, #  time.tm_gmtoff /1800,

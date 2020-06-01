@@ -17,10 +17,11 @@ __status__ = 'Development'
 __version__ = '20200529'
 
 
-from typing import Callable, Dict
+from typing import Callable, List
+from core import Info
 
 
-class Filter(object):
+class Filter:
 
     def __init__(self, *, func_rule: Callable, _list=None):
         self._func_rule = func_rule
@@ -29,21 +30,21 @@ class Filter(object):
         else:
             self._list = [func_rule]
 
-    def __call__(self, message: Dict) -> bool:
+    def __call__(self, message: Info) -> bool:
         return self._func_rule(message)
 
     def __neg__(self):
 
-        def func_rule(message: Dict) -> bool:
+        def func_rule(message: Info) -> bool:
             return not self._func_rule(message)
 
-        _list = [(['~'] + self._list)]
+        _list = [['~'] + self._list]
         return Filter(func_rule=func_rule, _list=_list)
 
     def __and__(self, other):
         assert isinstance(other, Filter)
 
-        def func_rule(message: Dict) -> bool:
+        def func_rule(message: Info) -> bool:
             return self._func_rule(message) and other._func_rule(message)
         _list = [(self._list + ['&']  + other._list)]
         return Filter(func_rule=func_rule, _list=_list)
@@ -51,10 +52,14 @@ class Filter(object):
     def __or__(self, other):
         assert isinstance(other, Filter)
 
-        def func_rule(message: Dict) -> bool:
+        def func_rule(message: Info) -> bool:
             return self._func_rule(message) or other._func_rule(message)
         _list = [(self._list + ['|']  + other._list)]
         return Filter(func_rule=func_rule, _list=_list)
+
+    def __repr__(self):
+        repr_string = ''.join(el if isinstance(el, str) else repr(el) for el in self._list)
+        return f'({repr_string})'
 
 
 

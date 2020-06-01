@@ -61,4 +61,4 @@ def test_restoration_info_from_json(ideal_tass_third_info, example_info_json):
 
 
 if __name__ == '__main__':
-    pytest.main()
+    pytest.main(['test_rss.py'])

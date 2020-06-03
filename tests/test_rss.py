@@ -7,7 +7,7 @@ import pytest
 from core.auto.rss import RssParser
 from core import Info, TimeZone
 
-from mock_objects import tass_info, ideal_tass_third_info, example_info_json
+from tests.mock_objects import tass_info, ideal_tass_third_info, example_info_json
 
 
 def test_parsed_page_format(tass_info, ideal_tass_third_info):

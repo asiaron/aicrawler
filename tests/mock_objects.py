@@ -1,11 +1,12 @@
 from datetime import datetime, timezone, timedelta
 import json
+from copy import deepcopy
 
 import pytest
 
 from core import Info, TimeZone
 from core.auto.rss import RssParser
-from core.filters import Filter
+# from core.filters import Filter
 from processing.filters import LabelFilter
 
 
@@ -43,13 +44,51 @@ def ideal_tass_third_info():
     )
 
 
+# Filters
+
+
 @pytest.fixture(scope='session')
-def disease_word_filter():
-    disease_words = []
-    return LabelFilter()
+def covid_filter():
+    covid_words = ['коронавирус', 'COVID', 'карантин']
+    return LabelFilter(labels=covid_words)
+
+
+@pytest.fixture(scope='session')
+def not_covid_disease_filter():
+    disease_words = ['АЧС', 'бешенств']
+    return LabelFilter(labels=disease_words)
+
+
+@pytest.fixture(scope='session')
+def economic_filter():
+    economic_words = ['экономик', 'бизнес']
+    return LabelFilter(labels=economic_words)
+
+# Info for testing filters
+
+
+@pytest.fixture(scope='session')
+def economic_info(tass_info):
+    return tass_info[52]
 
 
 @pytest.fixture(scope='session')
 def vaccination_rabies_info(tass_info):
     return tass_info[2]
 
+
+@pytest.fixture(scope='session')  # карантин
+def achs_virus_info(tass_info):
+    return tass_info[38]
+
+
+@pytest.fixture(scope='session')
+def covid_info_in_subjects_only(tass_info):
+    return tass_info[90]
+
+
+@pytest.fixture(scope='session')
+def covid_info_in_title_only(tass_info):
+    info = deepcopy(tass_info[93])
+    del info.subjects[1]  # covid related
+    return info

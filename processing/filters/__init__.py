@@ -24,10 +24,11 @@ from core.filters import Filter
 
 class LabelFilter(Filter):
 
-    def __init__(self, labels: List[str]):
+    def __init__(self, labels: List[str], alias=''):
         labels = [label.lower() for label in labels]
 
         def _func_rule(message: Info) -> bool:
+            assert isinstance(message, Info)
             nonlocal labels
             # assert 'title' in message
             # assert 'description' in message
@@ -43,5 +44,6 @@ class LabelFilter(Filter):
                        for label in labels
                        )
 
-        label_repr = ', '.join(labels) if len(labels) < 3 else ', '.join(labels[:2]) + '...'
-        super().__init__(func_rule=_func_rule, _list=[label_repr])
+        labels_repr = ', '.join(labels) if len(labels) < 3 else ', '.join(labels[:2]) + '...'
+        repr_str = alias or f'LabelFilter({labels_repr})'
+        super().__init__(func_rule=_func_rule, repr_str=repr_str)

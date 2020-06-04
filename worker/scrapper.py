@@ -32,6 +32,8 @@ import json
 # ! не убирать
 import processing.scrapper.imports
 
+from core.auto.tasks_environment import get_scrapper_func
+
 
 parser = argparse.ArgumentParser(
     description='',  # TODO
@@ -72,7 +74,12 @@ class Worker(ConsumerProducerMixin):
             body = json.loads(message.body)
             task = body['task']
             kwargs = body['kwargs']
-            func = processing.scrapper.imports._TASKS_ENVIRONMENT[task]
+
+            func = get_scrapper_func(task)
+            if func is None:
+                # ... TODO
+                raise Exception(f"Нет {task} функции!")
+
             pages = func(**kwargs)
             for page in pages:
                 self.producer.publish(

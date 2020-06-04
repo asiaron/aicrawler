@@ -31,6 +31,7 @@ _TASKS_ENVIRONMENT = {
 
 
 def scrapper_task(func):
+    global _TASKS_ENVIRONMENT
 
     @wraps(func)
     def inner(**kwargs):
@@ -44,3 +45,11 @@ def scrapper_task(func):
     _TASKS_ENVIRONMENT[inner.__name__] = inner
 
     return inner
+
+
+def get_scrapper_func(func_name: str):
+    global _TASKS_ENVIRONMENT
+    if func_name not in _TASKS_ENVIRONMENT:
+        return None
+    func = _TASKS_ENVIRONMENT[func_name]
+    return func

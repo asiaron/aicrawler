@@ -92,6 +92,10 @@ class RssParser:
 
 
 @scrapper_task
-def parse_rss(*, url, limit, time_bound):
-    pages = [page for page in RssParser(url).pages if page.time > datetime.fromisoformat(time_bound)]
-    return pages[:limit]
+def parse_rss(*, url, limit=None, time_bound=None):
+    pages = RssParser(url).pages
+    if time_bound:
+        pages = [page for page in RssParser(url).pages if page.time > datetime.fromisoformat(time_bound)]
+    if limit:
+        pages = pages[:limit]
+    return pages

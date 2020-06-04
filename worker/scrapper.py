@@ -55,10 +55,11 @@ parser.add_argument(
 
 
 class Worker(ConsumerProducerMixin):
-    def __init__(self, connection, in_, out):
+    def __init__(self, connection, in_, out, logger=logging.getLogger()):
         self.connection = connection
         self.in_ = Queue(in_)
         self.out = Exchange(out)
+        self.logger = logger
 
     def get_consumers(self, Consumer, channel):
         return [Consumer(queues=self.in_,
@@ -66,26 +67,34 @@ class Worker(ConsumerProducerMixin):
                          prefetch_count=10)]
 
     def handle_message(self, message: Message):
-        body = json.loads(message.body)
-        task = body['task']
-        kwargs = body['kwargs']
-        func = processing.scrapper.imports._TASKS_ENVIRONMENT[task]
-        pages = func(**kwargs)
-        for page in pages:
-            self.producer.publish(
-                body=page.to_json(),
-                exchange=self.out
-            )
-        message.ack()
+        self.logger.info(msg=f'Got message {message.delivery_tag}')
+        try:
+            body = json.loads(message.body)
+            task = body['task']
+            kwargs = body['kwargs']
+            func = processing.scrapper.imports._TASKS_ENVIRONMENT[task]
+            pages = func(**kwargs)
+            for page in pages:
+                self.producer.publish(
+                    body=page.to_json(),
+                    exchange=self.out
+                )
+            self.logger.info(msg=f'Message {message.delivery_tag} successfully accomplished')
+        except Exception as e:
+            self.logger.error(msg=e)
+        finally:
+            message.ack()
 
 
 def main(input_queue, output_queue):
+    logger = logging.getLogger('aicrawler')
+    logger.setLevel(logging.DEBUG)
     with Connection('amqp://') as connection:
-        Worker(connection, input_queue, output_queue).run()
+        Worker(connection, input_queue, output_queue, logger=logger).run()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = parser.parse_args()
     main(args.input_queue, args.output_queue)
 else:
-    raise Exception(f"File {__name__} cant be imnport")
+    raise Exception(f"File {__name__} can't be import")

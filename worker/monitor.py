@@ -7,6 +7,7 @@ created by pavel in pavel as 6/3/20
 Проект aicrawler
 """
 
+from time import sleep
 import datetime
 
 __author__ = 'pavelmstu'
@@ -34,7 +35,7 @@ parser.add_argument(
 
 # TODO
 # See /media/pavel/CryptDisk/AntiIdiot/gitlab/aicrawler/core/auto/tasks_environment.py
-example_task = {
+example_task_message = {
     "task": "parse_rss",
     "kwargs": {
         "url": "http://tass.ru/rss/v2.xml",
@@ -43,11 +44,30 @@ example_task = {
     }
 }
 
+
+TASKS = [
+    {
+        "last": datetime.datetime(2000, 1, 1),
+        "timedelta": datetime.timedelta(minutes=10),
+        "message": example_task_message,
+    }
+]
+
+
 def main(out):
-    with Connection() as connection:
-        with connection.channel() as channel:
-            producer = Producer(channel)
-            producer.publish(example_task,exchange=out)
+
+    while True:
+        for task in TASKS:
+            if task['last'] + task['timedelta'] < datetime.datetime.now():
+                with Connection() as connection:
+                    with connection.channel() as channel:
+                        producer = Producer(channel)
+                    producer.publish(example_task_message, exchange=out)
+
+                task['last'] = datetime.datetime.now()
+            continue
+        sleep(10)
+
 
 if __name__ == '__main__':
     args = parser.parse_args()

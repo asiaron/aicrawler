@@ -7,13 +7,11 @@ created by pavel in pavel as 5/26/20
 Проект aicrawler
 """
 
-import datetime
-# import
 
 __author__ = 'pavelmstu'
 __maintainer__ = 'pavelmstu'
 __credits__ = ['pavelmstu', ]
-__copyright__ = "LGPL v3"
+__copyright__ = 'LGPL v3'
 __status__ = 'Development'
 __version__ = '20200526'
 
@@ -29,6 +27,7 @@ import feedparser
 from time import struct_time, mktime
 from datetime import datetime
 from urllib.parse import urlparse
+from core.auto.tasks_environment import scrapper_task
 
 
 class RssParser:
@@ -90,3 +89,9 @@ class RssParser:
                 name='MSK'  # time.tm_zone
             )
         )
+
+
+@scrapper_task
+def parse_rss(*, url, limit, time_bound):
+    pages = [page for page in RssParser(url).pages if page.time > datetime.fromisoformat(time_bound)]
+    return pages[:limit]

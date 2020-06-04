@@ -15,3 +15,6 @@ __credits__ = ['pavelmstu', ]
 __copyright__ = "LGPL 3"
 __status__ = 'Development'
 __version__ = '20200603'
+
+from core.auto.rss import parse_rss
+from core.auto.tasks_environment import _TASKS_ENVIRONMENT

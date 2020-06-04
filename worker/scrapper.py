@@ -7,33 +7,32 @@
 __author__ = 'alex'
 __maintainer__ = 'alex'
 __credits__ = ['alex', 'pavelmstu']
-__copyright__ = "LGPL v.3"
+__copyright__ = 'LGPL v.3'
 __status__ = 'Development'
 __version__ = '20200602'
 
 import argparse
 
 import configparser
-from amqp.connection import Connection
-from amqp.basic_message import Message
+import dataclasses
 import logging
+from kombu import Connection, Queue, Exchange, Message
+from kombu.mixins import ConsumerProducerMixin
 from time import sleep
+import json
 
-from core.auto.rss import RssParser
+# from core.auto.rss import RssParser
 
-config = configparser.ConfigParser()
-config.read('./scrapper.ini')
-connection_setting = config['CONNECTION']
-rss_sources = config['RSS_SOURCES']
+# config = configparser.ConfigParser()
+# config.read('./scrapper.ini')
+# connection_setting = config['CONNECTION']
+# rss_sources = config['RSS_SOURCES']
 
 
 # ! не убирать
 import processing.scrapper.imports
 
 
-# TODO
-# https://docs.python.org/3/library/argparse.html
-#   ИЛИ https://click.palletsprojects.com/en/7.x/
 parser = argparse.ArgumentParser(
     description='',  # TODO
 )
@@ -49,27 +48,44 @@ parser.add_argument(
 
 parser.add_argument(
     '--out',
-    dest='input_queue',
+    dest='output_queue',
     help='output RabbitMQ exchange',
     default='scrapper-out-ex'
 )
 
 
-# TODO
-def main(a, b, c):
-    ...
+class Worker(ConsumerProducerMixin):
+    def __init__(self, connection, in_, out):
+        self.connection = connection
+        self.in_ = Queue(in_)
+        self.out = Exchange(out)
+
+    def get_consumers(self, Consumer, channel):
+        return [Consumer(queues=self.in_,
+                         on_message=self.handle_message,
+                         prefetch_count=10)]
+
+    def handle_message(self, message: Message):
+        body = json.loads(message.body)
+        task = body['task']
+        kwargs = body['kwargs']
+        func = processing.scrapper.imports._TASKS_ENVIRONMENT[task]
+        pages = func(**kwargs)
+        for page in pages:
+            self.producer.publish(
+                body=page.to_json(),
+                exchange=self.out
+            )
+        message.ack()
+
+
+def main(input_queue, output_queue):
+    with Connection('amqp://') as connection:
+        Worker(connection, input_queue, output_queue).run()
 
 
 if __name__ == "__main__":
-    with Connection(**connection_setting) as connection:
-        channel = connection.channel()
-        for name, url in rss_sources.items():
-            logging.info(f'Getting rss for {name}')
-            info_list = RssParser(url).pages
-            for info in info_list:
-                message = Message(info.to_json())
-                channel.basic_publish(message, 'cra-action2-ex')
-            # connection.exchange_declare('cra-action2-ex')
-        # connection.basic_publish()
+    args = parser.parse_args()
+    main(args.input_queue, args.output_queue)
 else:
     raise Exception(f"File {__name__} cant be imnport")

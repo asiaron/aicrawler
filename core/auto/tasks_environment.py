@@ -19,13 +19,13 @@ __version__ = '20200603'
 
 from functools import wraps
 
-from core.auto.rss import RssParser
+# from core.auto.rss import RssParser
 
 
 # TODO лучше сделать функцию ! RssParser
 
 _TASKS_ENVIRONMENT = {
-    "class.RssParser": RssParser,
+    # "class.RssParser": RssParser,
 }
 # RssParser(**kwargs)/media/pavel/CryptDisk/AntiIdiot/gitlab/aicrawler/core/auto/tasks_environment.py
 

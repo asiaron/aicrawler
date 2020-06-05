@@ -23,7 +23,7 @@ from processing.extractor import extract_text
 
 
 class Extractor(Worker):
-    def process_message(self, message: str) -> str:
+    def process_message(self, message: str) -> [str]:
         info = Info.from_json(message)
         page = requests.get(info.link)
         text = extract_text(page.text, info.source_url)

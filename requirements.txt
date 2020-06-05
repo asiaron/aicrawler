@@ -32,3 +32,5 @@ selenium~=3.141.0
 feedparser~=5.2.1
 responses~=0.10.14
 kombu~=4.6.10
+amqp~=2.6.0
+beautifulsoup4~=4.9.1

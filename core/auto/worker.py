@@ -19,6 +19,7 @@ from kombu import Queue, Exchange, Connection, Message
 from kombu.mixins import ConsumerProducerMixin
 import logging
 import argparse
+from typing import Iterable
 
 
 class Worker(ConsumerProducerMixin):
@@ -48,11 +49,11 @@ class Worker(ConsumerProducerMixin):
         finally:
             message.ack()
 
-    def process_message(self, body: str) -> str:
+    def process_message(self, body: str) -> Iterable[str]:
         raise NotImplementedError
 
     @classmethod
-    def run_from_args(cls, default_in: str, default_out: str):
+    def run_from_args(cls, worker_name: str):
         parser = argparse.ArgumentParser(
             description='',  # TODO
         )
@@ -61,18 +62,18 @@ class Worker(ConsumerProducerMixin):
             '--in',
             dest='input_queue',
             help='Input RabbitMQ queue',
-            default=default_in
+            default=worker_name + '-in'
         )
 
         parser.add_argument(
             '--out',
             dest='output_queue',
             help='output RabbitMQ exchange',
-            default=default_out
+            default=worker_name + '-out-ex'
         )
 
         args = parser.parse_args()
-        logger = logging.getLogger('aicrawler')
+        logger = logging.getLogger(worker_name)
         logger.setLevel(logging.DEBUG)
         with Connection('amqp://') as connection:
             cls(connection, args.input_queue, args.output_queue, logger=logger).run()

@@ -122,3 +122,6 @@ dmypy.json
 
 # BIn files
 bin/*
+
+# temporary
+tmp

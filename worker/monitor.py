@@ -13,7 +13,7 @@ import datetime
 __author__ = 'pavelmstu'
 __maintainer__ = 'pavelmstu'
 __credits__ = ['pavelmstu', ]
-__copyright__ = "Cybertonica LLC, London, 2020"
+__copyright__ = 'LGPL v3'
 __status__ = 'Development'
 __version__ = '20200603'
 
@@ -39,7 +39,7 @@ example_task_message = {
     "task": "parse_rss",
     "kwargs": {
         "url": "http://tass.ru/rss/v2.xml",
-        "limit": 10,
+        "limit": 100,
         "time_bound": "2020-06-04T10:00"
     }
 }
@@ -62,7 +62,7 @@ def main(out):
                 with Connection() as connection:
                     with connection.channel() as channel:
                         producer = Producer(channel)
-                    producer.publish(example_task_message, exchange=out)
+                        producer.publish(example_task_message, exchange=out)
 
                 task['last'] = datetime.datetime.now()
             continue
@@ -70,8 +70,8 @@ def main(out):
 
 
 if __name__ == '__main__':
-    args = parser.parse_args()
-    out = Exchange(args.output_queue)
+    # args = parser.parse_args()
+    out = Exchange('monitor-out-ex')#args.output_queue)
     main(out)
 else:
     raise Exception(f"File {__name__} can't be import")

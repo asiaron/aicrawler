@@ -1,21 +1,19 @@
 """
 first_filter.py
 
+TODO описание модуля
 
-~$ python3 -m worker.first_filter
-
-created by pavel in pavel as 5/29/20
+created by pavel in pavel as 6/2/20
 Проект aicrawler
 """
 
-import datetime
 
-__author__ = 'pavel'
-__maintainer__ = 'pavel'
-__credits__ = ['pavel', ]
-__copyright__ = "Cybertonica LLC, London, 2020"
+__author__ = 'pavelmstu'
+__maintainer__ = 'pavelmstu'
+__credits__ = ['pavelmstu', ]
+__copyright__ = 'LGPL v3'
 __status__ = 'Development'
-__version__ = '20200529'
+__version__ = '20200602'
 
 
 # TODO argparse

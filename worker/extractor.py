@@ -16,6 +16,7 @@ __status__ = 'Development'
 __version__ = '20200605'
 
 import requests
+from typing import Dict, List
 
 from core import Info
 from core.auto.worker import Worker
@@ -23,11 +24,19 @@ from processing.extractor import extract_text
 
 
 class Extractor(Worker):
-    def process_message(self, message: str) -> [str]:
+    def process_message(self, message: str) -> List[Dict]:
         info = Info.from_json(message)
         page = requests.get(info.link)
         text = extract_text(page.text, info.source_url)
-        return [text]
+        if text:
+            return [{
+                '_id': info.link,
+                'source': info.source,
+                'title': info.title,
+                'body': text['body']
+            }]
+        else:
+            return []
 
 
 if __name__ == '__main__':

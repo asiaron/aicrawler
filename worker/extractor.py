@@ -1,5 +1,5 @@
 """
-extractor.py
+test_extractor.py
 
 TODO описание модуля
 

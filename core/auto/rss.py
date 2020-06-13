@@ -30,6 +30,16 @@ from urllib.parse import urlparse
 from core.auto.tasks_environment import scrapper_task
 
 
+def netloc_to_source(netloc: str) -> str:
+    parts = netloc.split('.')
+    source = parts[0] if parts[0] != 'www' else parts[1]
+    return source
+
+
+def struct_time_to_datetime(struct: struct_time) -> datetime:
+    return datetime.fromtimestamp(mktime(struct))
+
+
 class RssParser:
     def __init__(self, url):
         self._link = url
@@ -66,16 +76,12 @@ class RssParser:
             our_guid = parsed.path.split('/')[-1] # take last element as guid: '/moskva/2312' -> '2312'
             return f'{self.site_name}::{our_guid}'
 
-    @staticmethod
-    def struct_time_to_datetime(struct: struct_time) -> datetime:
-        return datetime.fromtimestamp(mktime(struct))
-
     def entry_to_page(self, entry: FeedParserDict) -> Info:
         time = entry.published_parsed
         return Info(
             action=1,
             type='rss',
-            source='tass',
+            source=netloc_to_source(self.netloc),
             source_url=self.netloc,
             title=entry.title,
             guid=self.get_guid(entry.guid),
@@ -83,7 +89,7 @@ class RssParser:
             description=entry.get('summary', ''),
             preview=entry.get('summary', ''),
             subjects=[tag.term.lower() for tag in entry.get('tags', [])],
-            time=self.struct_time_to_datetime(time),
+            time=struct_time_to_datetime(time),
             zone=TimeZone(
                 offset=3, #  time.tm_gmtoff /1800,
                 name='MSK'  # time.tm_zone

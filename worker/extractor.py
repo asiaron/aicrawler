@@ -31,7 +31,7 @@ class Extractor(Worker):
         if text:
             return [{
                 '_id': info.link,
-                'source': info.source,
+                'source': info.source_url,
                 'title': info.title,
                 'body': text['body']
             }]

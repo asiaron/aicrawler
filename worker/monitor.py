@@ -35,12 +35,21 @@ parser.add_argument(
 
 # TODO
 # See /media/pavel/CryptDisk/AntiIdiot/gitlab/aicrawler/core/auto/tasks_environment.py
-example_task_message = {
-    "task": "parse_rss",
-    "kwargs": {
-        "url": "http://tass.ru/rss/v2.xml",
-        "limit": 100,
-        "time_bound": "2020-06-04T10:00"
+tass_rss_task_message = {
+    'task': 'parse_rss',
+    'kwargs': {
+        'url': 'http://tass.ru/rss/v2.xml',
+        'limit': 10,
+        'time_bound': '2020-06-04T10:00'
+    }
+}
+
+regnum_rss_task_message = {
+    'task': 'parse_rss',
+    'kwargs': {
+        'url': 'https://regnum.ru/rss/news',
+        'limit': 10,
+        'time_bound': '2020-06-04T10:00'
     }
 }
 
@@ -49,8 +58,13 @@ TASKS = [
     {
         "last": datetime.datetime(2000, 1, 1),
         "timedelta": datetime.timedelta(minutes=10),
-        "message": example_task_message,
-    }
+        "message": tass_rss_task_message,
+    },
+    {
+        "last": datetime.datetime(2000, 1, 1),
+        "timedelta": datetime.timedelta(minutes=10),
+        "message": regnum_rss_task_message,
+    },
 ]
 
 
@@ -62,7 +76,7 @@ def main(out):
                 with Connection() as connection:
                     with connection.channel() as channel:
                         producer = Producer(channel)
-                        producer.publish(example_task_message, exchange=out)
+                        producer.publish(task['message'], exchange=out)
 
                 task['last'] = datetime.datetime.now()
             continue
